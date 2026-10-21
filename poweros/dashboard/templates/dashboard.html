@@ -1,0 +1,525 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZYVARENTH PowerOS</title>
+<style>
+:root{--navy:#102342;--blue:#2463eb;--bg:#f4f7fb;--line:#e2e8f0;--muted:#64748b;--green:#15803d;--red:#b91c1c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:#18263c}
+header{background:var(--navy);color:white;padding:22px 28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{margin:0;font-size:24px;letter-spacing:.5px}
+header p{margin:6px 0 0;color:#cbd5e1;font-size:13px}
+button{background:var(--blue);border:0;border-radius:7px;color:white;padding:10px 15px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+button.secondary{background:#e8eef8;color:var(--navy)}
+nav{display:flex;gap:8px;padding:14px 24px;background:white;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav button{background:white;color:var(--muted);border:1px solid var(--line)}
+nav button.active{background:var(--navy);color:white}
+main{max-width:1500px;margin:auto;padding:22px}
+.page{display:none}.page.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.card{background:white;border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px;min-width:0}
+.card h2{font-size:16px;margin:0 0 16px;color:var(--navy)}
+.kpi-label{font-size:12px;color:var(--muted);margin-bottom:10px}
+.kpi{font-size:27px;font-weight:750;color:var(--navy);overflow-wrap:anywhere}
+.sub{font-size:12px;color:var(--muted);margin-top:7px}
+.status{display:inline-block;border-radius:20px;background:#dcfce7;color:#166534;padding:5px 10px;font-size:12px;font-weight:700}
+.status.bad{background:#fee2e2;color:#991b1b}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:700;background:#f8fafc}
+.table-wrap{overflow-x:auto}
+label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:0 0 6px}
+input,select{width:100%;border:1px solid #cbd5e1;border-radius:7px;padding:10px;background:white;color:#172033}
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.form-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+.note{font-size:12px;color:var(--muted);line-height:1.6}
+.message{padding:11px 13px;background:#eff6ff;border-radius:7px;color:#1d4ed8;font-size:13px;margin-top:12px;white-space:pre-wrap}
+.message.error{background:#fef2f2;color:#991b1b}
+canvas{width:100%;height:250px;display:block}
+.metric-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.metric{padding:12px;background:#f8fafc;border-radius:8px}
+.metric span{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+.metric strong{font-size:17px;color:var(--navy);overflow-wrap:anywhere}
+footer{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){main{padding:12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.card{padding:13px}.form-grid{grid-template-columns:1fr}header{padding:18px}.kpi{font-size:22px}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>ZYVARENTH PowerOS ⚡</h1>
+    <p>AI Power Orchestration · GPU scheduling · Energy optimization</p>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span id="connection" class="status">Connecting…</span>
+    <button onclick="refreshDashboard()">Refresh</button>
+  </div>
+</header>
+
+<nav>
+  <button class="active" data-page="overview">Overview</button>
+  <button data-page="workloads">Workloads</button>
+  <button data-page="power">Power & Energy</button>
+  <button data-page="decisions">Decisions</button>
+  <button data-page="system">System</button>
+</nav>
+
+<main>
+<section id="overview" class="page active">
+  <div class="grid">
+    <div class="card"><div class="kpi-label">Peak Facility Power</div><div id="peak" class="kpi">—</div><div class="sub">kW</div></div>
+    <div class="card"><div class="kpi-label">Power Headroom</div><div id="headroom" class="kpi">—</div><div class="sub">kW available</div></div>
+    <div class="card"><div class="kpi-label">Scheduled Workloads</div><div id="scheduled" class="kpi">—</div><div class="sub">Workloads scheduled</div></div>
+    <div class="card"><div class="kpi-label">Unscheduled Workloads</div><div id="unscheduled" class="kpi">—</div><div class="sub">Need attention</div></div>
+  </div>
+  <div class="two">
+    <div class="card"><h2>Hourly Power Demand</h2><canvas id="chart"></canvas><p class="note">Based on the hourly power-demand data returned by PowerOS.</p></div>
+    <div class="card">
+      <h2>Optimization Summary</h2>
+      <div class="metric-list">
+        <div class="metric"><span>System status</span><strong id="health">—</strong></div>
+        <div class="metric"><span>Optimization cost</span><strong id="cost">—</strong></div>
+        <div class="metric"><span>Workloads shifted</span><strong id="shifted">—</strong></div>
+        <div class="metric"><span>Deadline protection</span><strong id="protected">—</strong></div>
+        <div class="metric"><span>Solar power</span><strong id="solar">—</strong></div>
+        <div class="metric"><span>Battery dispatch</span><strong id="battery">—</strong></div>
+      </div>
+      <p id="summary" class="note">Waiting for dashboard data…</p>
+    </div>
+  </div>
+</section>
+
+<section id="workloads" class="page">
+  <div class="card">
+    <h2>Add Workload</h2>
+    <p class="note">Enter a workload, add it to the list, then run PowerOS. The workload is submitted through the existing customer API using the configuration below.</p>
+    <form id="workloadForm">
+      <div class="form-grid">
+        <div><label for="wid">Workload ID</label><input id="wid" required maxlength="60" placeholder="AI-TRAIN-001"></div>
+        <div><label for="gpuRequired">GPUs required</label><input id="gpuRequired" type="number" min="1" max="128" value="1" required></div>
+        <div><label for="duration">Duration (hours)</label><input id="duration" type="number" min="1" max="24" value="2" required></div>
+        <div><label for="deadline">Deadline hour (0–23)</label><input id="deadline" type="number" min="0" max="23" value="12" required></div>
+        <div><label for="priority">Priority</label><select id="priority"><option>HIGH</option><option selected>MEDIUM</option><option>LOW</option></select></div>
+        <div><label for="workloadPower">Power per GPU (kW)</label><input id="workloadPower" type="number" min="0.1" max="10" step="0.1" value="0.7" required></div>
+      </div>
+      <div class="form-actions">
+        <button type="submit">+ Add to Queue</button>
+        <button type="button" class="secondary" id="clearQueue">Clear Queue</button>
+      </div>
+    </form>
+    <div id="formMessage" class="message" style="display:none"></div>
+  </div>
+
+  <div class="card">
+    <h2>Queued Workloads</h2>
+    <div class="table-wrap"><table>
+      <thead><tr><th>ID</th><th>GPUs</th><th>Duration</th><th>Deadline</th><th>Priority</th><th>Action</th></tr></thead>
+      <tbody id="queueTable"><tr><td colspan="6">No new workloads added yet.</td></tr></tbody>
+    </table></div>
+    <div class="form-actions"><button id="runPowerOS">Run PowerOS on Queue</button></div>
+    <p class="note">Queued items are held in this browser page until submitted. This page does not permanently save them to a database.</p>
+  </div>
+
+  <div class="card">
+    <h2>Scheduling Results</h2>
+    <div id="runMessage" class="message" style="display:none"></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Workload</th><th>Status</th><th>Start</th><th>Finish</th><th>Priority</th><th>Decision</th></tr></thead>
+      <tbody id="workloadTable"><tr><td colspan="6">Load dashboard data or run a workload queue.</td></tr></tbody>
+    </table></div>
+  </div>
+</section>
+
+<section id="power" class="page">
+  <div class="grid">
+    <div class="card"><div class="kpi-label">Peak Power</div><div id="powerPeak" class="kpi">—</div><div class="sub">kW</div></div>
+    <div class="card"><div class="kpi-label">Power Pressure</div><div id="pressure" class="kpi">—</div><div class="sub">%</div></div>
+    <div class="card"><div class="kpi-label">Solar Output</div><div id="solarPower" class="kpi">—</div><div class="sub">kW as reported by engine</div></div>
+    <div class="card"><div class="kpi-label">Battery Dispatch</div><div id="batteryPower" class="kpi">—</div><div class="sub">kW or reported value</div></div>
+  </div>
+  <div class="card"><h2>Power & Energy Details</h2><div class="metric-list">
+    <div class="metric"><span>Power headroom</span><strong id="detailHeadroom">—</strong></div>
+    <div class="metric"><span>Electricity cost</span><strong id="detailCost">—</strong></div>
+    <div class="metric"><span>Hourly prices available</span><strong id="priceCount">—</strong></div>
+    <div class="metric"><span>Solar forecast points</span><strong id="solarCount">—</strong></div>
+  </div><p class="note">Only values supplied by the backend are shown. Energy and cooling breakdowns are not fabricated if the API does not return them.</p></div>
+</section>
+
+<section id="decisions" class="page">
+  <div class="card"><h2>PowerOS Decisions</h2>
+    <div class="table-wrap"><table><thead><tr><th>Workload</th><th>Decision</th><th>Action</th><th>Start</th><th>Finish</th><th>Priority</th><th>Reason</th></tr></thead>
+    <tbody id="decisionTable"><tr><td colspan="7">No decisions loaded.</td></tr></tbody></table></div>
+  </div>
+</section>
+
+<section id="system" class="page">
+  <div class="card"><h2>API Connectivity</h2>
+    <div class="metric-list">
+      <div class="metric"><span>Dashboard API</span><strong id="apiStatus">Checking…</strong></div>
+      <div class="metric"><span>Last refresh</span><strong id="apiTime">—</strong></div>
+      <div class="metric"><span>Backend status</span><strong id="backendStatus">—</strong></div>
+      <div class="metric"><span>Workload API</span><strong id="customerStatus">Not tested</strong></div>
+    </div>
+    <p class="note">Use the Flask address on port 5000. Opening this HTML through Live Server on port 5500 may cause API requests to go to the wrong server.</p>
+    <div class="form-actions"><button id="testApi">Test API</button></div>
+    <pre id="apiResponse" class="message" style="overflow:auto">No response yet.</pre>
+  </div>
+</section>
+</main>
+<footer>ZYVARENTH · BEYOND EVERY LIMIT · PowerOS prototype</footer>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+const fmt = (value, digits=2) => {
+  if (value === null || value === undefined || value === "") return "—";
+  const n = Number(value);
+  return Number.isFinite(n) ? n.toFixed(digits) : String(value);
+};
+const first = (obj, keys, fallback=null) => {
+  for (const key of keys) {
+    let value = obj;
+    for (const part of key.split(".")) value = value == null ? undefined : value[part];
+    if (value !== undefined && value !== null) return value;
+  }
+  return fallback;
+};
+const list = value => Array.isArray(value) ? value : [];
+let latestDashboard = null;
+let queue = [];
+let lastRunRows = null;
+
+document.querySelectorAll("nav button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b === button));
+    document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", p.id === button.dataset.page));
+    if (button.dataset.page === "workloads") renderQueue();
+    if (button.dataset.page === "power" && latestDashboard) renderPower(latestDashboard);
+  });
+});
+
+function setMessage(id, message, error=false) {
+  const el = $(id);
+  el.style.display = "block";
+  el.textContent = message;
+  el.classList.toggle("error", error);
+}
+
+function getScheduled(data) {
+  return list(first(data, ["scheduled_workloads", "schedule.scheduled", "optimization.scheduled"], []));
+}
+function getDecisions(data) {
+  return list(first(data, ["decisions", "optimization.decisions"], []));
+}
+function getUnscheduled(data) {
+  return list(first(data, ["unscheduled_workloads", "schedule.unscheduled", "optimization.unscheduled"], []));
+}
+
+function renderWorkloads(data) {
+  const scheduled = getScheduled(data);
+  const unscheduledRows = getUnscheduled(data);
+  const decisions = getDecisions(data);
+  const rows = [...scheduled.map(w => ({...w, _status:"SCHEDULED"})),
+                 ...unscheduledRows.map(w => ({...w, _status:"UNSCHEDULED"}))];
+  if (!rows.length && decisions.length) {
+    decisions.forEach(d => rows.push({
+      workload_id:first(d,["workload_id","id"],"—"),
+      start_hour:first(d,["start_hour"],null),
+      finish_hour:first(d,["finish_hour"],null),
+      priority:first(d,["priority"],"—"),
+      _status:first(d,["status","decision"],"—"),
+      _decision:first(d,["decision","action"],"—")
+    }));
+  }
+  if (!rows.length) {
+    $("workloadTable").innerHTML = '<tr><td colspan="6">No workload details returned by the API.</td></tr>';
+    return;
+  }
+  $("workloadTable").replaceChildren();
+  rows.forEach(w => {
+    const id = first(w,["workload_id","id","name"],"—");
+    const d = decisions.find(x => String(first(x,["workload_id","id"],"")) === String(id));
+    const start = first(w,["start_hour","start"],first(d||{},["start_hour"],null));
+    const finish = first(w,["finish_hour","end_hour","finish"],first(d||{},["finish_hour"],null));
+    const status = first(w,["_status","status"],"SCHEDULED");
+    const decision = first(w,["_decision","admission_action","decision","action"],first(d||{},["decision","action"],"—"));
+    const tr = document.createElement("tr");
+    [id,status,start == null ? "—" : start,finish == null ? "—" : finish,first(w,["priority"],"—"),decision].forEach(v=>{
+      const td=document.createElement("td");td.textContent=String(v);tr.appendChild(td);
+    });
+    $("workloadTable").appendChild(tr);
+  });
+}
+
+function renderDecisions(data) {
+  const decisions = getDecisions(data);
+  if (!decisions.length) {
+    $("decisionTable").innerHTML = '<tr><td colspan="7">No decisions returned by the API.</td></tr>';
+    return;
+  }
+  $("decisionTable").replaceChildren();
+  decisions.forEach(d=>{
+    const tr=document.createElement("tr");
+    const vals=[
+      first(d,["workload_id","id"],"—"),
+      first(d,["decision"],"—"),
+      first(d,["action","admission_action"],"—"),
+      first(d,["start_hour"],"—"),
+      first(d,["finish_hour"],"—"),
+      first(d,["priority"],"—"),
+      first(d,["reason","message"],"—")
+    ];
+    vals.forEach(v=>{const td=document.createElement("td");td.textContent=String(v ?? "—");tr.appendChild(td);});
+    $("decisionTable").appendChild(tr);
+  });
+}
+
+function renderPower(data) {
+  const peak = first(data,["peak_power","power_summary.peak_facility_power_kw","power_summary.peak_power_kw"],null);
+  const headroom = first(data,["power_headroom","power_summary.power_headroom_kw"],null);
+  const pressure = first(data,["power_pressure","power_summary.power_pressure_percent"],null);
+  const cost = first(data,["cost","optimization_summary.cost","optimization.cost"],null);
+  const solar = first(data,["solar","solar_power_kw"],null);
+  const battery = first(data,["battery","battery_dispatch.total_discharge_kw","battery_dispatch.battery_energy_used_kwh"],null);
+  $("powerPeak").textContent = peak == null ? "—" : fmt(peak);
+  $("pressure").textContent = pressure == null ? "—" : fmt(pressure);
+  $("solarPower").textContent = solar == null ? "—" : fmt(solar);
+  $("batteryPower").textContent = battery == null ? "—" : fmt(battery);
+  $("detailHeadroom").textContent = headroom == null ? "—" : fmt(headroom)+" kW";
+  $("detailCost").textContent = cost == null ? "—" : fmt(cost);
+  $("priceCount").textContent = list(first(data,["prices","electricity_prices"],[])).length;
+  $("solarCount").textContent = list(first(data,["solar_forecast","solar_power_by_hour"],[])).length;
+}
+
+function drawChart(values) {
+  const canvas = $("chart");
+  const rect = canvas.getBoundingClientRect();
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = Math.max(320,rect.width*ratio);
+  canvas.height = 250*ratio;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(ratio,ratio);
+  const width=canvas.width/ratio, height=250;
+  ctx.clearRect(0,0,width,height);
+  if (!values.length) {
+    ctx.fillStyle="#64748b";ctx.font="14px Arial";
+    ctx.fillText("No hourly power data available",18,35);return;
+  }
+  const pad={l:42,r:12,t:18,b:30};
+  const plotW=width-pad.l-pad.r,plotH=height-pad.t-pad.b;
+  const max=Math.max(1,...values.map(Number).filter(Number.isFinite))*1.15;
+  ctx.font="11px Arial";ctx.strokeStyle="#e2e8f0";ctx.fillStyle="#64748b";ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+plotH*i/4;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(width-pad.r,y);ctx.stroke();
+    ctx.fillText(fmt(max*(1-i/4),0),4,y+4);
+  }
+  ctx.beginPath();
+  values.forEach((v,i)=>{
+    const x=pad.l+(values.length===1?plotW/2:i*plotW/(values.length-1));
+    const y=pad.t+plotH-(Number(v)||0)/max*plotH;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle="#2463eb";ctx.lineWidth=2.5;ctx.stroke();
+  ctx.fillStyle="#64748b";
+  [0,Math.floor((values.length-1)/2),values.length-1].forEach(i=>{
+    const x=pad.l+(values.length===1?plotW/2:i*plotW/(values.length-1));
+    ctx.fillText("Hour "+i,Math.max(0,x-15),height-8);
+  });
+}
+
+function renderDashboard(data) {
+  latestDashboard=data;
+  $("peak").textContent = fmt(first(data,["peak_power","power_summary.peak_facility_power_kw"],null));
+  $("headroom").textContent = fmt(first(data,["power_headroom","power_summary.power_headroom_kw"],null));
+  $("scheduled").textContent = first(data,["scheduled","optimization.scheduled_count"],getScheduled(data).length);
+  $("unscheduled").textContent = first(data,["unscheduled","optimization.unscheduled_count"],getUnscheduled(data).length);
+  $("health").textContent = first(data,["status"],"—");
+  $("cost").textContent = fmt(first(data,["cost","optimization.cost"],null));
+  $("shifted").textContent = first(data,["shift","optimization.shifted_count"],"—");
+  $("protected").textContent = first(data,["protect","optimization.protected_count"],"—");
+  $("solar").textContent = fmt(first(data,["solar"],null));
+  $("battery").textContent = fmt(first(data,["battery"],null));
+  $("summary").textContent = "Bottleneck: "+first(data,["bottleneck"],"—")+
+    " · Power pressure: "+fmt(first(data,["power_pressure"],null))+"%"+
+    " · Total workloads: "+first(data,["total_workloads"],"—");
+  drawChart(list(first(data,["power_demand","power_demand_by_hour"],[])));
+  renderWorkloads(data);
+  renderDecisions(data);
+  renderPower(data);
+  $("backendStatus").textContent=first(data,["status"],"Responding");
+}
+
+async function refreshDashboard() {
+  $("connection").textContent="Connecting…";
+  $("connection").classList.remove("bad");
+  try {
+    const response=await fetch("/api/dashboard",{cache:"no-store"});
+    const data=await response.json();
+    if(!response.ok) throw new Error(data.error || "HTTP "+response.status);
+    renderDashboard(data);
+    $("connection").textContent="API Connected";
+    $("apiStatus").textContent="Connected";
+    $("apiTime").textContent=new Date().toLocaleTimeString();
+    $("apiResponse").textContent=JSON.stringify(data,null,2);
+  } catch(error) {
+    $("connection").textContent="API Error";
+    $("connection").classList.add("bad");
+    $("apiStatus").textContent="Failed";
+    $("apiTime").textContent=new Date().toLocaleTimeString();
+    $("apiResponse").textContent=String(error)+"\n\nOpen the Flask app at http://127.0.0.1:5000/ and make sure the backend is running.";
+  }
+}
+
+function renderQueue() {
+  const body=$("queueTable");
+  body.replaceChildren();
+  if(!queue.length){
+    body.innerHTML='<tr><td colspan="6">No new workloads added yet.</td></tr>';return;
+  }
+  queue.forEach((w,index)=>{
+    const tr=document.createElement("tr");
+    [w.workload_id,w.gpu_required,w.duration_hours,w.deadline_hour,w.priority].forEach(v=>{
+      const td=document.createElement("td");td.textContent=String(v);tr.appendChild(td);
+    });
+    const td=document.createElement("td");
+    const btn=document.createElement("button");btn.className="secondary";btn.textContent="Remove";
+    btn.addEventListener("click",()=>{queue.splice(index,1);renderQueue();});
+    td.appendChild(btn);tr.appendChild(td);body.appendChild(tr);
+  });
+}
+
+$("workloadForm").addEventListener("submit",event=>{
+  event.preventDefault();
+  const workload={
+    workload_id:$("wid").value.trim(),
+    gpu_required:Number($("gpuRequired").value),
+    duration_hours:Number($("duration").value),
+    deadline_hour:Number($("deadline").value),
+    priority:$("priority").value,
+    power_kw:Number($("workloadPower").value)
+  };
+  if(!workload.workload_id){setMessage("formMessage","Enter a workload ID.",true);return;}
+  if(queue.some(w=>w.workload_id===workload.workload_id)){
+    setMessage("formMessage","That workload ID is already in the queue.",true);return;
+  }
+  queue.push(workload);
+  renderQueue();
+  setMessage("formMessage","Workload added to the local queue. Select “Run PowerOS on Queue” to submit it.");
+  $("wid").value="";
+});
+
+$("clearQueue").addEventListener("click",()=>{
+  queue=[];renderQueue();$("formMessage").style.display="none";
+});
+
+function buildCustomerPayload() {
+  const maxGpu=Math.max(1,...queue.map(w=>w.gpu_required));
+  const gpuCount=Math.max(8,maxGpu);
+  return {
+    customer_name:"ZYVARENTH Demo",
+    pue:1.3,
+    gpus:Array.from({length:gpuCount},(_,i)=>({
+      gpu_id:"GPU-"+String(i+1).padStart(3,"0"),
+      power_kw:queue.length ? queue[0].power_kw : 0.7,
+      utilization_percent:0,
+      temperature_c:60,
+      memory_utilization_percent:0,
+      available:true
+    })),
+    workloads:queue.map(w=>({
+      workload_id:w.workload_id,
+      gpu_required:w.gpu_required,
+      duration_hours:w.duration_hours,
+      deadline_hour:w.deadline_hour,
+      priority:w.priority
+    })),
+    power:{
+      available_power_kw:70,
+      grid_capacity_kw:100,
+      electricity_price_per_kwh:5,
+      solar_power_kw:10,
+      battery_available_kw:10
+    }
+  };
+}
+
+function findResultRows(data) {
+  const scheduled=list(first(data,["scheduled_workloads","results.scheduled_workloads","optimization.scheduled","schedule.scheduled"],[]));
+  const unscheduled=list(first(data,["unscheduled_workloads","results.unscheduled_workloads","optimization.unscheduled","schedule.unscheduled"],[]));
+  const decisions=list(first(data,["decisions","results.decisions"],[]));
+  const rows=[
+    ...scheduled.map(w=>({...w,_status:"SCHEDULED"})),
+    ...unscheduled.map(w=>({...w,_status:"UNSCHEDULED"}))
+  ];
+  if(rows.length) return rows;
+  if(decisions.length) return decisions.map(d=>({...d,_status:first(d,["status","decision"],"DECISION")}));
+  return [];
+}
+
+$("runPowerOS").addEventListener("click",async()=>{
+  if(!queue.length){setMessage("runMessage","Add at least one workload first.",true);return;}
+  const button=$("runPowerOS");
+  button.disabled=true;button.textContent="Running PowerOS…";
+  $("customerStatus").textContent="Running…";
+  setMessage("runMessage","Submitting workloads to the existing PowerOS customer API…");
+  try{
+    const response=await fetch("/api/customer/run",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(buildCustomerPayload())
+    });
+    const data=await response.json();
+    $("apiResponse").textContent=JSON.stringify(data,null,2);
+    if(!response.ok || data.success===false || data.valid===false){
+      throw new Error(first(data,["error","message","detail"],"Request failed with HTTP "+response.status));
+    }
+    $("customerStatus").textContent="Request successful";
+    const rows=findResultRows(data);
+    if(rows.length){
+      lastRunRows=rows;
+      $("workloadTable").replaceChildren();
+      rows.forEach(w=>{
+        const tr=document.createElement("tr");
+        const values=[
+          first(w,["workload_id","id"],"—"),
+          first(w,["_status","status","decision"],"—"),
+          first(w,["start_hour"],"—"),
+          first(w,["finish_hour","end_hour"],"—"),
+          first(w,["priority"],"—"),
+          first(w,["decision","action","admission_action"],"—")
+        ];
+        values.forEach(v=>{const td=document.createElement("td");td.textContent=String(v??"—");tr.appendChild(td);});
+      });
+    }else{
+      $("workloadTable").innerHTML='<tr><td colspan="6">The API accepted the request, but returned no recognizable scheduling rows. Check the response in System.</td></tr>';
+    }
+    setMessage("runMessage","PowerOS API responded successfully. Review the scheduling results and raw API response. "+(rows.length ? rows.length+" result row(s) returned." : "No result rows were recognized."));
+    queue=[];
+    renderQueue();
+    document.querySelector('nav button[data-page="workloads"]').click();
+    await refreshDashboard();
+  }catch(error){
+    $("customerStatus").textContent="Failed";
+    setMessage("runMessage","Workload submission failed: "+error.message+"\nCheck that Flask is running on port 5000 and inspect System → API response.",true);
+  }finally{
+    button.disabled=false;button.textContent="Run PowerOS on Queue";
+  }
+});
+
+$("testApi").addEventListener("click",refreshDashboard);
+window.addEventListener("resize",()=>{
+  if(latestDashboard) drawChart(list(first(latestDashboard,["power_demand","power_demand_by_hour"],[])));
+});
+refreshDashboard();
+setInterval(refreshDashboard,60000);
+</script>
+</body>
+</html>

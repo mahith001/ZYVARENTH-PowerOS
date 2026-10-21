@@ -1,0 +1,2618 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ZYVARENTH PowerOS</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #f5f7fb;
+            color: #0b2a52;
+        }
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        .header {
+
+            background: white;
+
+            border-bottom:
+                1px solid #dbe3ee;
+
+            padding:
+                28px 48px;
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+        }
+
+        .brand-title {
+
+            margin: 0;
+
+            font-size: 38px;
+
+            font-weight: 700;
+
+            letter-spacing: 2px;
+        }
+
+        .brand-subtitle {
+
+            margin-top: 8px;
+
+            color: #5c7595;
+
+            font-size: 20px;
+        }
+
+        .status {
+
+            padding:
+                15px 25px;
+
+            border-radius: 40px;
+
+            background: #e7f6ef;
+
+            color: #087443;
+
+            font-size: 18px;
+
+            font-weight: 700;
+        }
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        .container {
+
+            max-width: 1450px;
+
+            margin: auto;
+
+            padding:
+                40px;
+        }
+
+        /* =====================================================
+           KPI GRID
+        ===================================================== */
+
+        .kpi-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 24px;
+
+            margin-bottom: 36px;
+        }
+
+        .card {
+
+            background: white;
+
+            border:
+                1px solid #dbe3ee;
+
+            border-radius: 22px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 8px 25px
+                rgba(
+                    20,
+                    50,
+                    90,
+                    0.05
+                );
+        }
+
+        .card-title {
+
+            color: #627c9e;
+
+            font-size: 17px;
+
+            margin-bottom: 18px;
+        }
+
+        .card-value {
+
+            font-size: 35px;
+
+            font-weight: 700;
+
+            color: #082b55;
+        }
+
+        .unit {
+
+            font-size: 17px;
+
+            color: #6680a1;
+
+            margin-left: 5px;
+        }
+
+        /* =====================================================
+           SECTION
+        ===================================================== */
+
+        .section {
+
+            margin-bottom: 38px;
+        }
+
+        .section-title {
+
+            font-size: 27px;
+
+            margin:
+                0 0 18px 0;
+
+            color: #082b55;
+        }
+
+        /* =====================================================
+           CHARTS
+        ===================================================== */
+
+        .chart-card {
+
+            background: white;
+
+            border:
+                1px solid #dbe3ee;
+
+            border-radius: 22px;
+
+            padding: 25px;
+
+            height: 390px;
+        }
+
+        /* =====================================================
+           TWO COLUMN
+        ===================================================== */
+
+        .two-column {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 24px;
+        }
+
+        /* =====================================================
+           RESOURCE CARDS
+        ===================================================== */
+
+        .resource-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 18px;
+        }
+
+        .resource {
+
+            background: white;
+
+            border:
+                1px solid #dbe3ee;
+
+            border-radius: 18px;
+
+            padding: 22px;
+        }
+
+        .resource-label {
+
+            color: #67809f;
+
+            font-size: 15px;
+
+            margin-bottom: 10px;
+        }
+
+        .resource-value {
+
+            font-size: 26px;
+
+            font-weight: 700;
+
+            color: #082b55;
+        }
+
+        /* =====================================================
+           DECISIONS
+        ===================================================== */
+
+        .decision-grid {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 18px;
+        }
+
+        .decision {
+
+            background: white;
+
+            border:
+                1px solid #dbe3ee;
+
+            border-radius: 18px;
+
+            padding: 22px;
+        }
+
+        .decision-name {
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            margin-bottom: 10px;
+        }
+
+        .decision-count {
+
+            font-size: 32px;
+
+            font-weight: 700;
+        }
+
+        .run {
+            border-top: 5px solid #168a52;
+        }
+
+        .wait {
+            border-top: 5px solid #8a8a8a;
+        }
+
+        .shift {
+            border-top: 5px solid #d99100;
+        }
+
+        .protect {
+            border-top: 5px solid #c43d3d;
+        }
+
+        /* =====================================================
+           LIVE DECISIONS
+        ===================================================== */
+
+        .decision-list {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 12px;
+        }
+
+        .decision-row {
+
+            background: white;
+
+            border:
+                1px solid #dbe3ee;
+
+            border-radius: 16px;
+
+            padding: 18px 20px;
+
+            display: grid;
+
+            grid-template-columns:
+                180px
+                1fr
+                120px
+                100px;
+
+            gap: 15px;
+
+            align-items: center;
+        }
+
+        .decision-badge {
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            padding:
+                7px 12px;
+
+            border-radius: 20px;
+
+            display: inline-block;
+
+            width: fit-content;
+        }
+
+        .badge-run {
+
+            background: #e7f6ef;
+
+            color: #087443;
+        }
+
+        .badge-shift {
+
+            background: #fff4dc;
+
+            color: #9b6400;
+        }
+
+        .badge-protect {
+
+            background: #fdeaea;
+
+            color: #b22c2c;
+        }
+
+        .badge-wait {
+
+            background: #eeeeee;
+
+            color: #666666;
+        }
+
+        .decision-workload {
+
+            font-weight: 700;
+
+            color: #0b2a52;
+        }
+
+        .decision-reason {
+
+            color: #657d9b;
+
+            font-size: 14px;
+        }
+
+        /* =====================================================
+           TABLE
+        ===================================================== */
+
+        .table-container {
+
+            background: white;
+
+            border:
+                1px solid #dbe3ee;
+
+            border-radius: 22px;
+
+            overflow: auto;
+        }
+
+        table {
+
+            width: 100%;
+
+            border-collapse:
+                collapse;
+        }
+
+        th {
+
+            background: #f1f5fa;
+
+            color: #496681;
+
+            text-align: left;
+
+            padding: 16px;
+
+            font-size: 14px;
+        }
+
+        td {
+
+            padding: 15px 16px;
+
+            border-top:
+                1px solid #e5ebf2;
+
+            color: #243f60;
+
+            font-size: 14px;
+        }
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        .footer {
+
+            text-align: center;
+
+            color: #7186a0;
+
+            padding:
+                30px 10px;
+
+            font-size: 14px;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (max-width: 1100px) {
+
+            .kpi-grid,
+            .resource-grid,
+            .decision-grid {
+
+                grid-template-columns:
+                    repeat(2, 1fr);
+            }
+
+            .two-column {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+        }
+
+        @media (max-width: 700px) {
+
+            .header {
+
+                padding:
+                    22px;
+
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: 18px;
+            }
+
+            .brand-title {
+
+                font-size: 29px;
+            }
+
+            .brand-subtitle {
+
+                font-size: 16px;
+            }
+
+            .container {
+
+                padding: 20px;
+            }
+
+            .kpi-grid,
+            .resource-grid,
+            .decision-grid {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+            .chart-card {
+
+                height: 320px;
+            }
+
+            .decision-row {
+
+                grid-template-columns:
+                    1fr;
+            }
+        }
+
+    
+        .scenario-card {
+            background: white;
+            border: 1px solid #dbe3ee;
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: 0 8px 25px rgba(20, 50, 90, 0.05);
+        }
+
+        .scenario-controls {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .scenario-select {
+            min-width: 320px;
+            padding: 14px 16px;
+            border: 1px solid #dbe3ee;
+            border-radius: 10px;
+            background: white;
+            color: #0b2a52;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .scenario-button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            background: #0b2a52;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .scenario-button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .scenario-status {
+            margin-top: 18px;
+            color: #627c9e;
+            font-size: 15px;
+        }
+
+        .scenario-result {
+            display: none;
+            margin-top: 24px;
+        }
+
+        .scenario-result-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+
+        .scenario-decision-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-top: 18px;
+            padding: 20px;
+            background: #f5f7fb;
+            border-radius: 16px;
+        }
+
+        .scenario-decision-item {
+            color: #496681;
+            font-size: 15px;
+        }
+
+        .scenario-decision-item strong {
+            display: block;
+            margin-top: 6px;
+            color: #082b55;
+            font-size: 25px;
+        }
+
+        @media (max-width: 1100px) {
+            .scenario-result-grid,
+            .scenario-decision-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .scenario-select {
+                min-width: 100%;
+            }
+
+            .scenario-button {
+                width: 100%;
+            }
+
+            .scenario-result-grid,
+            .scenario-decision-strip {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    
+
+    /* =====================================================
+       CUSTOMER POWEROS INPUT
+    ===================================================== */
+
+    .customer-poweros-panel {
+        margin-top: 30px;
+    }
+
+    .customer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+    }
+
+    .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .input-group label {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .input-group input,
+    .input-group select {
+        padding: 10px 12px;
+        border: 1px solid #d8dee8;
+        border-radius: 8px;
+        font-size: 14px;
+        background: #ffffff;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .workload-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-top: 28px;
+    }
+
+    .workload-header h3 {
+        margin: 0;
+    }
+
+    .workload-header p {
+        margin: 6px 0 0;
+        color: #67809f;
+    }
+
+    .workload-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 15px;
+    }
+
+    .workload-row {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr auto;
+        gap: 12px;
+        align-items: end;
+        padding: 16px;
+        border: 1px solid #e1e6ee;
+        border-radius: 10px;
+        background: #fafbfd;
+    }
+
+    .small-button,
+    .customer-run-button {
+        padding: 10px 14px;
+        border: 0;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 700;
+    }
+
+    .small-button {
+        background: #eef2f7;
+        color: #082b55;
+    }
+
+    .small-button:hover,
+    .customer-run-button:hover {
+        opacity: 0.9;
+    }
+
+    .customer-run-button {
+        margin-top: 22px;
+    }
+
+    .customer-result {
+        margin-top: 20px;
+        padding: 18px;
+        border-radius: 10px;
+        background: #f7f9fc;
+    }
+
+    .customer-result.success {
+        border: 1px solid #cfe8d5;
+    }
+
+    .customer-result.error {
+        border: 1px solid #efcaca;
+    }
+
+    .customer-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+        margin-top: 15px;
+    }
+
+    .customer-summary-card {
+        padding: 12px;
+        border: 1px solid #e1e6ee;
+        border-radius: 8px;
+        background: #ffffff;
+    }
+
+    .customer-summary-card strong {
+        display: block;
+        font-size: 12px;
+        opacity: 0.7;
+        margin-bottom: 5px;
+    }
+
+    @media (max-width: 900px) {
+        .workload-row {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .workload-row .remove-workload {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .workload-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<header class="header">
+
+    <div>
+
+        <h1 class="brand-title">
+            ZYVARENTH PowerOS
+        </h1>
+
+        <div class="brand-subtitle">
+            AI Compute–Power Orchestration Platform
+        </div>
+
+    </div>
+
+    <div
+        id="systemStatus"
+        class="status"
+    >
+        LOADING
+    </div>
+
+</header>
+
+
+<main class="container">
+
+
+<!-- =========================================================
+     KPI
+========================================================= -->
+
+<section class="kpi-grid">
+
+
+    <div class="card">
+
+        <div class="card-title">
+            Peak Facility Power
+        </div>
+
+        <div class="card-value">
+
+            <span id="peakPower">
+                —
+            </span>
+
+            <span class="unit">
+                kW
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-title">
+            Power Headroom
+        </div>
+
+        <div class="card-value">
+
+            <span id="powerHeadroom">
+                —
+            </span>
+
+            <span class="unit">
+                kW
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-title">
+            Workloads Scheduled
+        </div>
+
+        <div class="card-value">
+
+            <span id="scheduledWorkloads">
+                —
+            </span>
+
+            /
+            <span id="totalWorkloads">
+                —
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-title">
+            Estimated Cost
+        </div>
+
+        <div class="card-value">
+
+            ₹<span id="estimatedCost">
+                —
+            </span>
+
+        </div>
+
+    </div>
+
+
+</section>
+
+
+<!-- =========================================================
+     POWER DEMAND
+========================================================= -->
+
+<section class="section">
+
+    <h2 class="section-title">
+        24-Hour Power Demand
+    </h2>
+
+    <div class="chart-card">
+
+        <canvas
+            id="powerChart"
+        ></canvas>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     PRICE + SOLAR
+========================================================= -->
+
+<section class="section">
+
+    <div class="two-column">
+
+
+        <div>
+
+            <h2 class="section-title">
+                Electricity Price
+            </h2>
+
+            <div class="chart-card">
+
+                <canvas
+                    id="priceChart"
+                ></canvas>
+
+            </div>
+
+        </div>
+
+
+        <div>
+
+            <h2 class="section-title">
+                Solar Forecast
+            </h2>
+
+            <div class="chart-card">
+
+                <canvas
+                    id="solarChart"
+                ></canvas>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     ENERGY RESOURCES
+========================================================= -->
+
+<section class="section">
+
+    <h2 class="section-title">
+        Energy Resources
+    </h2>
+
+
+    <div class="resource-grid">
+
+
+        <div class="resource">
+
+            <div class="resource-label">
+                Solar Used
+            </div>
+
+            <div class="resource-value">
+
+                <span id="solarUsed">
+                    —
+                </span>
+
+                kWh
+
+            </div>
+
+        </div>
+
+
+        <div class="resource">
+
+            <div class="resource-label">
+                Battery Used
+            </div>
+
+            <div class="resource-value">
+
+                <span id="batteryUsed">
+                    —
+                </span>
+
+                kWh
+
+            </div>
+
+        </div>
+
+
+        <div class="resource">
+
+            <div class="resource-label">
+                Power Pressure
+            </div>
+
+            <div class="resource-value">
+
+                <span id="powerPressure">
+                    —
+                </span>
+
+                %
+
+            </div>
+
+        </div>
+
+
+        <div class="resource">
+
+            <div class="resource-label">
+                Primary Bottleneck
+            </div>
+
+            <div class="resource-value">
+
+                <span id="bottleneck">
+                    —
+                </span>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     DECISION COUNTS
+========================================================= -->
+
+<section class="section">
+
+    <h2 class="section-title">
+        PowerOS Decision Summary
+    </h2>
+
+
+    <div class="decision-grid">
+
+
+        <div class="decision run">
+
+            <div class="decision-name">
+                RUN
+            </div>
+
+            <div
+                id="runCount"
+                class="decision-count"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="decision wait">
+
+            <div class="decision-name">
+                WAIT
+            </div>
+
+            <div
+                id="waitCount"
+                class="decision-count"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="decision shift">
+
+            <div class="decision-name">
+                SHIFT
+            </div>
+
+            <div
+                id="shiftCount"
+                class="decision-count"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="decision protect">
+
+            <div class="decision-name">
+                PROTECT DEADLINE
+            </div>
+
+            <div
+                id="protectCount"
+                class="decision-count"
+            >
+                —
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     LIVE DECISIONS
+========================================================= -->
+
+<section class="section">
+
+    <h2 class="section-title">
+        PowerOS Live Decisions
+    </h2>
+
+
+    <div
+        id="decisionList"
+        class="decision-list"
+    >
+
+        <div class="card">
+            Loading PowerOS decisions...
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     SCHEDULED WORKLOADS
+========================================================= -->
+
+<section class="section">
+
+    <h2 class="section-title">
+        Scheduled Workloads
+    </h2>
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Workload
+                    </th>
+
+                    <th>
+                        Start
+                    </th>
+
+                    <th>
+                        Finish
+                    </th>
+
+                    <th>
+                        GPUs
+                    </th>
+
+                    <th>
+                        Power
+                    </th>
+
+                    <th>
+                        Deadline
+                    </th>
+
+                    <th>
+                        Priority
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="workloadTable">
+
+                <tr>
+
+                    <td colspan="7">
+                        Loading...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+
+<!-- CUSTOMER POWEROS INPUT -->
+<section class="panel customer-poweros-panel" id="customerPowerOS">
+    <div class="panel-header">
+        <div>
+            <h2>Customer Infrastructure</h2>
+            <p>Run PowerOS using customer-provided infrastructure and workload data.</p>
+        </div>
+    </div>
+
+    <div class="customer-grid">
+        <div class="input-group"><label>Customer Name</label><input id="customerName" type="text" value="Demo Customer"></div>
+        <div class="input-group"><label>Number of GPUs</label><input id="gpuCount" type="number" value="4" min="1"></div>
+        <div class="input-group"><label>GPU Power (kW)</label><input id="gpuPower" type="number" value="0.7" step="0.1" min="0.01"></div>
+        <div class="input-group"><label>Available Power (kW)</label><input id="availablePower" type="number" value="10" step="0.1" min="0"></div>
+        <div class="input-group"><label>Grid Capacity (kW)</label><input id="gridCapacity" type="number" value="15" step="0.1" min="0"></div>
+        <div class="input-group"><label>Electricity Price (₹/kWh)</label><input id="electricityPrice" type="number" value="8.5" step="0.1" min="0"></div>
+        <div class="input-group"><label>Solar Power (kW)</label><input id="solarPower" type="number" value="3" step="0.1" min="0"></div>
+        <div class="input-group"><label>Battery Power (kW)</label><input id="batteryPower" type="number" value="2" step="0.1" min="0"></div>
+        <div class="input-group"><label>PUE</label><input id="pue" type="number" value="1.3" step="0.1" min="1"></div>
+    </div>
+
+    <div class="workload-header">
+        <div><h3>Customer Workloads</h3><p>Add the actual workloads PowerOS needs to schedule.</p></div>
+        <button type="button" class="small-button" onclick="addWorkloadRow()">+ ADD WORKLOAD</button>
+    </div>
+
+    <div id="workloadList" class="workload-list"></div>
+
+    <button type="button" id="customerRunButton" class="primary-button customer-run-button" onclick="runCustomerPowerOS()">RUN POWEROS FOR CUSTOMER</button>
+
+    <div id="customerResult" class="customer-result">Enter customer infrastructure and workload data, then run PowerOS.</div>
+</section>
+
+</main>
+
+
+
+<!-- =========================================================
+     SCENARIO SIMULATOR
+========================================================= -->
+
+<section class="section">
+
+    <h2 class="section-title">
+        PowerOS Scenario Simulator
+    </h2>
+
+    <div class="scenario-card">
+
+        <div class="scenario-controls">
+
+            <select
+                id="scenarioSelect"
+                class="scenario-select"
+            >
+                <option value="power_reduction">
+                    20% Power Reduction
+                </option>
+
+                <option value="price_increase">
+                    50% Electricity Price Increase
+                </option>
+
+                <option value="solar_reduction">
+                    50% Solar Reduction
+                </option>
+
+                <option value="gpu_demand_increase">
+                    30% GPU Demand Increase
+                </option>
+            </select>
+
+            <button
+                id="runScenarioButton"
+                class="scenario-button"
+                type="button"
+                onclick="runScenario()"
+            >
+                RUN SCENARIO
+            </button>
+
+        </div>
+
+        <div id="scenarioStatus" class="scenario-status">
+            Select a scenario and run PowerOS.
+        </div>
+
+        <div id="scenarioResult" class="scenario-result">
+
+            <div class="scenario-result-grid">
+
+                <div class="resource">
+                    <div class="resource-label">Status</div>
+                    <div id="scenarioResultStatus" class="resource-value">—</div>
+                </div>
+
+                <div class="resource">
+                    <div class="resource-label">Power Pressure</div>
+                    <div id="scenarioPressure" class="resource-value">—</div>
+                </div>
+
+                <div class="resource">
+                    <div class="resource-label">Power Headroom</div>
+                    <div id="scenarioHeadroom" class="resource-value">—</div>
+                </div>
+
+                <div class="resource">
+                    <div class="resource-label">Bottleneck</div>
+                    <div id="scenarioBottleneck" class="resource-value">—</div>
+                </div>
+
+            </div>
+
+            <div class="scenario-decision-strip">
+
+                <div class="scenario-decision-item">
+                    RUN
+                    <strong id="scenarioRun">0</strong>
+                </div>
+
+                <div class="scenario-decision-item">
+                    SHIFT
+                    <strong id="scenarioShift">0</strong>
+                </div>
+
+                <div class="scenario-decision-item">
+                    PROTECT DEADLINE
+                    <strong id="scenarioProtect">0</strong>
+                </div>
+
+                <div class="scenario-decision-item">
+                    SCHEDULED
+                    <strong id="scenarioScheduled">0</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer class="footer">
+
+    ZYVARENTH PowerOS
+    —
+    AI Compute–Power Orchestration
+
+</footer>
+
+
+<script>
+
+
+/* =========================================================
+   GLOBAL CHARTS
+========================================================= */
+
+let powerChart = null;
+
+let priceChart = null;
+
+let solarChart = null;
+
+
+/* =========================================================
+   NUMBER FORMAT
+========================================================= */
+
+function formatNumber(
+    value,
+    decimals = 2
+) {
+
+    const number = Number(value);
+
+    if (
+        Number.isNaN(number)
+    ) {
+
+        return "0.00";
+
+    }
+
+    return number.toFixed(
+        decimals
+    );
+}
+
+
+/* =========================================================
+   POWER CHART
+========================================================= */
+
+function createPowerChart(
+    values
+) {
+
+    const canvas =
+        document.getElementById(
+            "powerChart"
+        );
+
+    if (powerChart) {
+
+        powerChart.destroy();
+
+    }
+
+    const labels =
+        values.map(
+            (_, index) =>
+                "Hour " + index
+        );
+
+
+    powerChart =
+        new Chart(
+            canvas,
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: labels,
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Facility Power (kW)",
+
+                            data:
+                                values,
+
+                            borderWidth: 3,
+
+                            tension: 0.3,
+
+                            fill: false
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio:
+                        false,
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero:
+                                true
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   PRICE CHART
+========================================================= */
+
+function createPriceChart(
+    values
+) {
+
+    const canvas =
+        document.getElementById(
+            "priceChart"
+        );
+
+    if (priceChart) {
+
+        priceChart.destroy();
+
+    }
+
+    const labels =
+        values.map(
+            (_, index) =>
+                "Hour " + index
+        );
+
+
+    priceChart =
+        new Chart(
+            canvas,
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: labels,
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Electricity Price (₹/kWh)",
+
+                            data:
+                                values,
+
+                            borderWidth: 3,
+
+                            tension: 0.3,
+
+                            fill: false
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio:
+                        false,
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero:
+                                true
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   SOLAR CHART
+========================================================= */
+
+function createSolarChart(
+    values
+) {
+
+    const canvas =
+        document.getElementById(
+            "solarChart"
+        );
+
+    if (solarChart) {
+
+        solarChart.destroy();
+
+    }
+
+    const labels =
+        values.map(
+            (_, index) =>
+                "Hour " + index
+        );
+
+
+    solarChart =
+        new Chart(
+            canvas,
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: labels,
+
+                    datasets: [
+
+                        {
+
+                            label:
+                                "Solar Power (kW)",
+
+                            data:
+                                values,
+
+                            borderWidth: 3,
+
+                            tension: 0.3,
+
+                            fill: false
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio:
+                        false,
+
+                    scales: {
+
+                        y: {
+
+                            beginAtZero:
+                                true
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   DECISION BADGE
+========================================================= */
+
+function getDecisionClass(
+    decision
+) {
+
+    const value =
+        String(
+            decision || "WAIT"
+        ).toUpperCase();
+
+
+    if (
+        value.includes("RUN")
+    ) {
+
+        return "badge-run";
+
+    }
+
+
+    if (
+        value.includes("SHIFT")
+    ) {
+
+        return "badge-shift";
+
+    }
+
+
+    if (
+        value.includes("PROTECT")
+    ) {
+
+        return "badge-protect";
+
+    }
+
+
+    return "badge-wait";
+}
+
+
+/* =========================================================
+   DISPLAY DECISIONS
+========================================================= */
+
+function populateDecisions(
+    decisions
+) {
+
+    const container =
+        document.getElementById(
+            "decisionList"
+        );
+
+
+    if (
+        !Array.isArray(decisions)
+        ||
+        decisions.length === 0
+    ) {
+
+        container.innerHTML = `
+            <div class="card">
+                No individual decisions available.
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        decisions.map(
+            (item) => {
+
+                const decision =
+                    item.decision ||
+                    item.action ||
+                    "WAIT";
+
+                const workload =
+                    item.workload_id ||
+                    "UNKNOWN";
+
+                const reason =
+                    item.reason ||
+                    "PowerOS optimization decision";
+
+                const start =
+                    item.start_hour;
+
+                const deadline =
+                    item.deadline_hour;
+
+
+                return `
+
+                    <div class="decision-row">
+
+                        <div>
+
+                            <span
+                                class="decision-badge
+                                ${getDecisionClass(
+                                    decision
+                                )}"
+                            >
+                                ${decision}
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <div
+                                class="decision-workload"
+                            >
+                                ${workload}
+                            </div>
+
+                            <div
+                                class="decision-reason"
+                            >
+                                ${reason}
+                            </div>
+
+                        </div>
+
+
+                        <div>
+
+                            Start:
+                            ${
+                                start !== null &&
+                                start !== undefined
+                                    ? "Hour " + start
+                                    : "—"
+                            }
+
+                        </div>
+
+
+                        <div>
+
+                            Deadline:
+                            ${
+                                deadline !== null &&
+                                deadline !== undefined
+                                    ? "Hour " + deadline
+                                    : "—"
+                            }
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+/* =========================================================
+   DISPLAY WORKLOADS
+========================================================= */
+
+function populateWorkloads(
+    workloads
+) {
+
+    const table =
+        document.getElementById(
+            "workloadTable"
+        );
+
+
+    if (
+        !Array.isArray(workloads)
+        ||
+        workloads.length === 0
+    ) {
+
+        table.innerHTML = `
+
+            <tr>
+
+                <td colspan="7">
+                    No scheduled workloads.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    table.innerHTML =
+        workloads.map(
+            (item) => `
+
+                <tr>
+
+                    <td>
+                        <strong>
+                            ${
+                                item.workload_id
+                                || "UNKNOWN"
+                            }
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${
+                            item.start_hour
+                            ?? "—"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            item.finish_hour
+                            ?? "—"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            item.gpu_required
+                            ?? 0
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            formatNumber(
+                                item.power_kw
+                                || 0
+                            )
+                        }
+                        kW
+                    </td>
+
+                    <td>
+                        ${
+                            item.deadline_hour
+                            ?? "—"
+                        }
+                    </td>
+
+                    <td>
+                        ${
+                            item.priority
+                            || "MEDIUM"
+                        }
+                    </td>
+
+                </tr>
+
+            `
+        ).join("");
+
+}
+
+
+/* =========================================================
+   UPDATE DASHBOARD
+========================================================= */
+
+function updateDashboard(
+    data
+) {
+
+    /* Status */
+
+    document.getElementById(
+        "systemStatus"
+    ).textContent =
+        data.status ||
+        "UNKNOWN";
+
+
+    /* KPI */
+
+    document.getElementById(
+        "peakPower"
+    ).textContent =
+        formatNumber(
+            data.peak_power
+        );
+
+
+    document.getElementById(
+        "powerHeadroom"
+    ).textContent =
+        formatNumber(
+            data.power_headroom
+        );
+
+
+    document.getElementById(
+        "scheduledWorkloads"
+    ).textContent =
+        data.scheduled ?? 0;
+
+
+    document.getElementById(
+        "totalWorkloads"
+    ).textContent =
+        data.total_workloads ?? 0;
+
+
+    document.getElementById(
+        "estimatedCost"
+    ).textContent =
+        formatNumber(
+            data.cost
+        );
+
+
+    /* Resources */
+
+    document.getElementById(
+        "solarUsed"
+    ).textContent =
+        formatNumber(
+            data.solar
+        );
+
+
+    document.getElementById(
+        "batteryUsed"
+    ).textContent =
+        formatNumber(
+            data.battery
+        );
+
+
+    document.getElementById(
+        "powerPressure"
+    ).textContent =
+        formatNumber(
+            data.power_pressure
+        );
+
+
+    document.getElementById(
+        "bottleneck"
+    ).textContent =
+        data.bottleneck ||
+        "NONE";
+
+
+    /* Decision counts */
+
+    document.getElementById(
+        "runCount"
+    ).textContent =
+        data.run ?? 0;
+
+
+    document.getElementById(
+        "waitCount"
+    ).textContent =
+        data.wait ?? 0;
+
+
+    document.getElementById(
+        "shiftCount"
+    ).textContent =
+        data.shift ?? 0;
+
+
+    document.getElementById(
+        "protectCount"
+    ).textContent =
+        data.protect ?? 0;
+
+
+    /* Charts */
+
+    createPowerChart(
+        data.power_demand || []
+    );
+
+
+    createPriceChart(
+        data.prices || []
+    );
+
+
+    createSolarChart(
+        data.solar_forecast || []
+    );
+
+
+    /* Decisions */
+
+    populateDecisions(
+        data.decisions || []
+    );
+
+
+    /* Workloads */
+
+    populateWorkloads(
+        data.scheduled_workloads || []
+    );
+
+}
+
+
+/* =========================================================
+   LOAD DASHBOARD FROM API
+========================================================= */
+
+async function loadDashboard() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/dashboard"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "API returned HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        console.log(
+            "POWEROS API DATA:",
+            data
+        );
+
+
+        updateDashboard(
+            data
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "POWEROS DASHBOARD ERROR:",
+            error
+        );
+
+
+        document.getElementById(
+            "systemStatus"
+        ).textContent =
+            "API ERROR";
+
+
+        document.getElementById(
+            "decisionList"
+        ).innerHTML = `
+
+            <div class="card">
+
+                <strong>
+                    Unable to load PowerOS API.
+                </strong>
+
+                <br><br>
+
+                Check that the Flask server
+                is running.
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+
+/* =========================================================
+   SCENARIO SIMULATOR
+========================================================= */
+
+async function runScenario() {
+
+    const select = document.getElementById("scenarioSelect");
+    const button = document.getElementById("runScenarioButton");
+    const status = document.getElementById("scenarioStatus");
+    const resultBox = document.getElementById("scenarioResult");
+    const scenario = select.value;
+
+    button.disabled = true;
+    button.textContent = "RUNNING...";
+    status.textContent = "PowerOS is evaluating the scenario...";
+    resultBox.style.display = "none";
+
+    try {
+
+        const response = await fetch(
+            "/api/scenario?scenario=" + encodeURIComponent(scenario)
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                data.error || "Scenario API error"
+            );
+        }
+
+        document.getElementById("scenarioResultStatus").textContent =
+            data.status || "UNKNOWN";
+
+        document.getElementById("scenarioPressure").textContent =
+            formatNumber(data.power_pressure) + "%";
+
+        document.getElementById("scenarioHeadroom").textContent =
+            formatNumber(data.power_headroom) + " kW";
+
+        document.getElementById("scenarioBottleneck").textContent =
+            data.bottleneck || "NONE";
+
+        document.getElementById("scenarioRun").textContent =
+            data.run ?? 0;
+
+        document.getElementById("scenarioShift").textContent =
+            data.shift ?? 0;
+
+        document.getElementById("scenarioProtect").textContent =
+            data.protect ?? 0;
+
+        document.getElementById("scenarioScheduled").textContent =
+            data.scheduled ?? 0;
+
+        resultBox.style.display = "block";
+
+        status.textContent =
+            "Scenario completed successfully.";
+
+        console.log(
+            "POWEROS SCENARIO RESULT:",
+            data
+        );
+
+    } catch (error) {
+
+        console.error(
+            "SCENARIO ERROR:",
+            error
+        );
+
+        status.textContent =
+            "Scenario failed: " + error.message;
+
+    } finally {
+
+        button.disabled = false;
+        button.textContent = "RUN SCENARIO";
+    }
+}
+
+loadDashboard();
+
+let workloadCounter = 0;
+
+function addWorkloadRow(values = {}) {
+    workloadCounter += 1;
+    const id = workloadCounter;
+    const row = document.createElement("div");
+    row.className = "workload-row";
+    row.dataset.workloadId = id;
+    row.innerHTML = `
+        <div class="input-group"><label>Workload ${id} — ID</label><input class="workload-id" type="text" value="${values.workload_id || `CUSTOMER-WORKLOAD-${String(id).padStart(3,"0")}`}"></div>
+        <div class="input-group"><label>GPUs</label><input class="workload-gpu" type="number" value="${values.gpu_required ?? 1}" min="1"></div>
+        <div class="input-group"><label>Duration (hours)</label><input class="workload-duration" type="number" value="${values.duration_hours ?? 2}" min="0.1" step="0.1"></div>
+        <div class="input-group"><label>Deadline</label><input class="workload-deadline" type="number" value="${values.deadline_hour ?? 24}" min="1" max="24"></div>
+        <div class="input-group"><label>Priority</label><select class="workload-priority"><option value="HIGH" ${values.priority === "HIGH" ? "selected" : ""}>HIGH</option><option value="MEDIUM" ${!values.priority || values.priority === "MEDIUM" ? "selected" : ""}>MEDIUM</option><option value="LOW" ${values.priority === "LOW" ? "selected" : ""}>LOW</option></select></div>
+        <button type="button" class="small-button remove-workload" onclick="removeWorkloadRow(this)">REMOVE</button>
+    `;
+    document.getElementById("workloadList").appendChild(row);
+}
+
+function removeWorkloadRow(button) {
+    const rows = document.querySelectorAll("#workloadList .workload-row");
+    if (rows.length <= 1) { alert("At least one workload is required."); return; }
+    button.closest(".workload-row").remove();
+}
+
+function collectCustomerWorkloads() {
+    return [...document.querySelectorAll("#workloadList .workload-row")].map(row => ({
+        workload_id: row.querySelector(".workload-id").value.trim(),
+        gpu_required: Number(row.querySelector(".workload-gpu").value),
+        duration_hours: Number(row.querySelector(".workload-duration").value),
+        deadline_hour: Number(row.querySelector(".workload-deadline").value),
+        priority: row.querySelector(".workload-priority").value
+    }));
+}
+
+function buildCustomerPayload() {
+    const gpuCount = Number(document.getElementById("gpuCount").value);
+    const gpuPower = Number(document.getElementById("gpuPower").value);
+    const gridCapacity = Number(document.getElementById("gridCapacity").value);
+    const solarPower = Number(document.getElementById("solarPower").value);
+    const batteryPower = Number(document.getElementById("batteryPower").value);
+    const electricityPrice = Number(document.getElementById("electricityPrice").value);
+
+    const gpus = Array.from({length: gpuCount}, (_, i) => ({
+        gpu_id: `CUSTOMER-GPU-${String(i + 1).padStart(3, "0")}`,
+        power_kw: gpuPower,
+        utilization_percent: 0,
+        temperature_c: 60,
+        memory_utilization_percent: 0,
+        available: true
+    }));
+
+    return {
+        customer_name: document.getElementById("customerName").value.trim(),
+        gpus,
+        workloads: collectCustomerWorkloads(),
+        power: {
+            available_power_kw: Number(document.getElementById("availablePower").value),
+            grid_capacity_kw: gridCapacity,
+            electricity_price_per_kwh: electricityPrice,
+            solar_power_kw: solarPower,
+            battery_available_kw: batteryPower
+        },
+        energy_resources: [
+            {name: "GRID", available_power_kw: gridCapacity, cost_per_kwh: electricityPrice, renewable: false},
+            {name: "SOLAR", available_power_kw: solarPower, cost_per_kwh: 0, renewable: true},
+            {name: "BATTERY", available_power_kw: batteryPower, cost_per_kwh: 6, renewable: false}
+        ],
+        pue: Number(document.getElementById("pue").value)
+    };
+}
+
+
+
+async function runCustomerPowerOS() {
+    const button = document.getElementById("customerRunButton");
+    const resultBox = document.getElementById("customerResult");
+
+    if (!button || !resultBox) {
+        console.error("Customer PowerOS button or result area not found.");
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = "RUNNING POWEROS...";
+    resultBox.className = "customer-result";
+    resultBox.textContent = "PowerOS is processing the customer configuration...";
+
+    try {
+        const payload = buildCustomerPayload();
+
+        if (!payload.customer_name) {
+            throw new Error("Customer name is required.");
+        }
+
+        if (!payload.workloads || payload.workloads.length === 0) {
+            throw new Error("Add at least one workload.");
+        }
+
+        const response = await fetch("/api/customer/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || result.status !== "SUCCESS") {
+            throw new Error(result.error || "PowerOS customer API failed.");
+        }
+
+        const infrastructure = result.infrastructure || {};
+        const optimization = result.optimization || {};
+        const powerSummary = result.power_summary || {};
+        const decisionSummary = result.decision_summary || {};
+        const scheduled = optimization.scheduled_workloads || [];
+        const unscheduled = optimization.unscheduled_workloads || [];
+        const decisions = result.decisions || [];
+
+        const esc = value => {
+            if (value === null || value === undefined || value === "") {
+                return "—";
+            }
+
+            return String(value).replace(/[&<>"']/g, char => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            })[char]);
+        };
+
+        const cell = value => `<td>${esc(value)}</td>`;
+
+        const renderWorkloads = (items, type) => {
+            if (!items.length) {
+                return `<p>No ${type.toLowerCase()} workloads returned by the optimizer.</p>`;
+            }
+
+            return `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Workload ID</th>
+                                <th>GPUs</th>
+                                <th>Start Hour</th>
+                                <th>Finish Hour</th>
+                                <th>Duration</th>
+                                <th>Deadline</th>
+                                <th>Priority</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${items.map(item => `
+                                <tr>
+                                    ${cell(item.workload_id ?? item.id)}
+                                    ${cell(item.gpu_required)}
+                                    ${cell(item.start_hour)}
+                                    ${cell(item.finish_hour)}
+                                    ${cell(item.duration_hours)}
+                                    ${cell(item.deadline_hour)}
+                                    ${cell(item.priority)}
+                                    ${cell(item.reason)}
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        };
+
+        const renderDecisions = () => {
+            if (!decisions.length) {
+                return "<p>No individual decision records were returned.</p>";
+            }
+
+            return `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Workload ID</th>
+                                <th>Action</th>
+                                <th>Status</th>
+                                <th>Start Hour</th>
+                                <th>Finish Hour</th>
+                                <th>Deadline</th>
+                                <th>Priority</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${decisions.map(item => `
+                                <tr>
+                                    ${cell(item.workload_id ?? item.id)}
+                                    ${cell(item.action ?? item.decision)}
+                                    ${cell(item.status)}
+                                    ${cell(item.start_hour)}
+                                    ${cell(item.finish_hour)}
+                                    ${cell(item.deadline_hour)}
+                                    ${cell(item.priority)}
+                                    ${cell(item.reason)}
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        };
+
+        const card = (label, value, unit = "") => `
+            <div class="customer-summary-card">
+                <strong>${esc(label)}</strong>
+                ${esc(value)}${unit}
+            </div>
+        `;
+
+        resultBox.className = "customer-result success";
+        resultBox.innerHTML = `
+            <h2>POWEROS CUSTOMER RESULT</h2>
+            <p><strong>Customer:</strong> ${esc(result.customer_name)}</p>
+
+            <h3>Infrastructure Summary</h3>
+            <div class="customer-summary-grid">
+                ${card("GPUs", infrastructure.gpus)}
+                ${card("Workloads Submitted", infrastructure.workloads)}
+                ${card("Available Power", infrastructure.available_power_kw, " kW")}
+                ${card("Grid Capacity", infrastructure.grid_capacity_kw, " kW")}
+                ${card("Electricity Price", infrastructure.electricity_price_per_kwh)}
+                ${card("Solar Power", infrastructure.solar_power_kw, " kW")}
+                ${card("Battery Power", infrastructure.battery_available_kw, " kW")}
+                ${card("PUE", infrastructure.pue)}
+            </div>
+
+            <h3>Scheduling Summary</h3>
+            <div class="customer-summary-grid">
+                ${card("Scheduled", optimization.scheduled ?? scheduled.length)}
+                ${card("Unscheduled", optimization.unscheduled ?? unscheduled.length)}
+            </div>
+
+            <h3>PowerOS Decision Summary</h3>
+            <div class="customer-summary-grid">
+                ${card("RUN", decisionSummary.run ?? 0)}
+                ${card("WAIT", decisionSummary.wait ?? 0)}
+                ${card("SHIFT", decisionSummary.shift ?? 0)}
+                ${card("PROTECT DEADLINE", decisionSummary.protect_deadline ?? 0)}
+            </div>
+
+            <h3>Scheduled Workloads</h3>
+            ${renderWorkloads(scheduled, "Scheduled")}
+
+            <h3>Unscheduled Workloads</h3>
+            ${renderWorkloads(unscheduled, "Unscheduled")}
+
+            <h3>Individual Workload Decisions</h3>
+            ${renderDecisions()}
+
+            <h3>Power Summary</h3>
+            <div class="customer-summary-grid">
+                ${card("Peak Facility Power",
+                    powerSummary.peak_facility_power_kw ?? powerSummary.peak_power_kw,
+                    " kW")}
+                ${card("Total IT Power",
+                    powerSummary.total_it_power_kw, " kW")}
+                ${card("Cooling Overhead",
+                    powerSummary.cooling_overhead_kw, " kW")}
+                ${card("Total Facility Energy",
+                    powerSummary.total_facility_energy_kwh ?? powerSummary.total_energy_kwh,
+                    " kWh")}
+            </div>
+
+            <p><strong>✓ ${esc(result.message || "PowerOS processed the customer request.")}</strong></p>
+        `;
+
+    } catch (error) {
+        console.error("CUSTOMER POWEROS ERROR:", error);
+        resultBox.className = "customer-result error";
+        resultBox.textContent = "ERROR: " + error.message;
+    } finally {
+        button.disabled = false;
+        button.textContent = "RUN POWEROS FOR CUSTOMER";
+    }
+}
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    addWorkloadRow({workload_id:"CUSTOMER-WORKLOAD-001", gpu_required:2, duration_hours:4, deadline_hour:12, priority:"HIGH"});
+    addWorkloadRow({workload_id:"CUSTOMER-WORKLOAD-002", gpu_required:4, duration_hours:6, deadline_hour:18, priority:"HIGH"});
+    addWorkloadRow({workload_id:"CUSTOMER-WORKLOAD-003", gpu_required:1, duration_hours:2, deadline_hour:20, priority:"MEDIUM"});
+});
+
+</script>
+
+<script src="{{ url_for('static', filename='customer_results.js') }}"></script>
+</body>
+
+</html>
