@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -452,16 +451,76 @@ function buildCustomerPayload() {
 }
 
 function findResultRows(data) {
-  const scheduled=list(first(data,["scheduled_workloads","results.scheduled_workloads","optimization.scheduled","schedule.scheduled"],[]));
-  const unscheduled=list(first(data,["unscheduled_workloads","results.unscheduled_workloads","optimization.unscheduled","schedule.unscheduled"],[]));
-  const decisions=list(first(data,["decisions","results.decisions"],[]));
-  const rows=[
-    ...scheduled.map(w=>({...w,_status:"SCHEDULED"})),
-    ...unscheduled.map(w=>({...w,_status:"UNSCHEDULED"}))
+  // The customer API returns workload lists inside data.optimization.
+  const scheduled = list(first(data, [
+    "optimization.scheduled_workloads",
+    "scheduled_workloads",
+    "results.scheduled_workloads",
+    "optimization.scheduled",
+    "schedule.scheduled"
+  ], []));
+  const unscheduled = list(first(data, [
+    "optimization.unscheduled_workloads",
+    "unscheduled_workloads",
+    "results.unscheduled_workloads",
+    "optimization.unscheduled",
+    "schedule.unscheduled"
+  ], []));
+  const decisions = list(first(data, [
+    "decisions",
+    "optimization.decisions",
+    "results.decisions"
+  ], []));
+
+  const rows = [
+    ...scheduled.map(w => ({ ...w, _status: "SCHEDULED" })),
+    ...unscheduled.map(w => ({ ...w, _status: "UNSCHEDULED" }))
   ];
-  if(rows.length) return rows;
-  if(decisions.length) return decisions.map(d=>({...d,_status:first(d,["status","decision"],"DECISION")}));
+
+  if (rows.length) return rows;
+  if (decisions.length) {
+    return decisions.map(d => ({
+      ...d,
+      _status: first(d, ["status", "decision"], "DECISION")
+    }));
+  }
   return [];
+}
+
+function renderCustomerResultRows(rows) {
+  const body = $("workloadTable");
+  body.replaceChildren();
+
+  if (!rows.length) {
+    body.innerHTML = '<tr><td colspan="6">The API accepted the request, but returned no recognizable scheduling rows. Check System → API response.</td></tr>';
+    return;
+  }
+
+  rows.forEach(w => {
+    const tr = document.createElement("tr");
+    const start = first(w, ["start_hour", "start"], null);
+    let finish = first(w, ["finish_hour", "end_hour", "finish"], null);
+
+    if (finish == null && start != null && first(w, ["duration_hours"], null) != null) {
+      finish = Number(start) + Number(first(w, ["duration_hours"], 0));
+    }
+
+    const values = [
+      first(w, ["workload_id", "id", "name"], "—"),
+      first(w, ["_status", "status", "decision"], "—"),
+      start == null ? "—" : start,
+      finish == null ? "—" : finish,
+      first(w, ["priority"], "—"),
+      first(w, ["decision", "action", "admission_action", "reason"], "—")
+    ];
+
+    values.forEach(value => {
+      const td = document.createElement("td");
+      td.textContent = String(value ?? "—");
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
 }
 
 $("runPowerOS").addEventListener("click",async()=>{
@@ -481,31 +540,31 @@ $("runPowerOS").addEventListener("click",async()=>{
     if(!response.ok || data.success===false || data.valid===false){
       throw new Error(first(data,["error","message","detail"],"Request failed with HTTP "+response.status));
     }
-    $("customerStatus").textContent="Request successful";
-    const rows=findResultRows(data);
-    if(rows.length){
-      lastRunRows=rows;
-      $("workloadTable").replaceChildren();
-      rows.forEach(w=>{
-        const tr=document.createElement("tr");
-        const values=[
-          first(w,["workload_id","id"],"—"),
-          first(w,["_status","status","decision"],"—"),
-          first(w,["start_hour"],"—"),
-          first(w,["finish_hour","end_hour"],"—"),
-          first(w,["priority"],"—"),
-          first(w,["decision","action","admission_action"],"—")
-        ];
-        values.forEach(v=>{const td=document.createElement("td");td.textContent=String(v??"—");tr.appendChild(td);});
-      });
-    }else{
-      $("workloadTable").innerHTML='<tr><td colspan="6">The API accepted the request, but returned no recognizable scheduling rows. Check the response in System.</td></tr>';
+    if (data.status === "ERROR") {
+      throw new Error(first(data, ["error", "message", "detail"], "PowerOS returned an error."));
     }
-    setMessage("runMessage","PowerOS API responded successfully. Review the scheduling results and raw API response. "+(rows.length ? rows.length+" result row(s) returned." : "No result rows were recognized."));
-    queue=[];
+
+    const rows = findResultRows(data);
+    lastRunRows = rows;
+    $("customerStatus").textContent = "Request successful";
+    $("apiResponse").textContent = JSON.stringify(data, null, 2);
+
+    // Refresh overview metrics first, then show the customer-run rows.
+    // Otherwise refreshDashboard() would replace them with demo rows.
+    queue = [];
     renderQueue();
     document.querySelector('nav button[data-page="workloads"]').click();
     await refreshDashboard();
+    renderCustomerResultRows(rows);
+
+    setMessage(
+      "runMessage",
+      "PowerOS API responded successfully. " +
+      (rows.length
+        ? rows.length + " scheduling result row(s) returned."
+        : "No scheduling rows were found. Check System → API response."),
+      rows.length === 0
+    );
   }catch(error){
     $("customerStatus").textContent="Failed";
     setMessage("runMessage","Workload submission failed: "+error.message+"\nCheck that Flask is running on port 5000 and inspect System → API response.",true);
